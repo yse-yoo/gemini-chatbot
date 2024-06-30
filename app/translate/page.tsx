@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 interface Message {
@@ -12,10 +12,19 @@ export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isListening, setIsListening] = useState<boolean>(false);
     const [recognition, setRecognition] = useState<any>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         translate();
     }, []);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     const translate = () => {
         if ('webkitSpeechRecognition' in window) {
@@ -63,10 +72,12 @@ export default function Home() {
 
     return (
         <div className="p-4 mb-4 overflow-y-scroll">
-            <h1>会話アプリ</h1>
-            <button onClick={handleVoiceInput} className="p-2 bg-blue-500 text-white rounded mt-4">
-                {isListening ? 'Listening...' : '音声入力'}
-            </button>
+            <div className="fixed top-0 left-0 right-0 bg-white shadow-md p-4 z-10">
+                <h1>会話アプリ</h1>
+                <button onClick={handleVoiceInput} className="p-2 bg-blue-500 text-white rounded mt-4">
+                    {isListening ? 'Listening...' : '音声入力'}
+                </button>
+            </div>
             <div>
                 {messages && messages.map((message, index) => (
                     <div
@@ -86,6 +97,7 @@ export default function Home() {
                     </div>
                 ))}
             </div>
+            <div ref={messagesEndRef} />
         </div>
     );
 }
