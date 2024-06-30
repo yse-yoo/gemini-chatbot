@@ -9,24 +9,14 @@ export async function POST(req: NextRequest) {
     const message = await req.json();
     if (!message) return;
 
-    // const botMessage:Message = { sender: "bot", content: "Hello" };
-    // return NextResponse.json(botMessage);
-
     const API_KEY = process.env.GEMINI_API_KEY;
     if (!API_KEY) return;
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const chat = model.startChat(
-            {
-                history: history,
-                generationConfig: {
-                    maxOutputTokens: 100,
-                },
-            }
-        );
-        const result = await chat.sendMessage(message.content);
+        // コンテンツ生成
+        const result = await model.generateContent(message.content);
 
         const botContent = result.response.text();
         const botMessage: Message = { sender: "bot", content: botContent };

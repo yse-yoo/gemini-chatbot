@@ -60,7 +60,14 @@ export default function Home() {
                                 'text-left text-gray-600'}
                             `}
                     >
-                        <span>{message.sender}</span>
+                        <span className={
+                            `inline-block mb-2 me-3 px-3 py-1 
+                             rounded-full text-white 
+                             text-sm font-semibold
+                             ${message.sender === 'user' ? 'bg-blue-600' : 'bg-gray-600'}
+                            `}>
+                            {message.sender === 'user' ? 'あなた' : 'ボット'}
+                        </span>
                         <span>{message.content}</span>
                     </div>
                 ))}
