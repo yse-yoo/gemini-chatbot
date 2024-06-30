@@ -1,7 +1,9 @@
 // app/api/chat/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, Content, TextPart } from '@google/generative-ai';
 import { Message } from '@/app/interfaces/Message';
+
+var history: Content[] = [];
 
 export async function POST(req: NextRequest) {
     const message = await req.json();
@@ -14,10 +16,15 @@ export async function POST(req: NextRequest) {
     if (!API_KEY) return;
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
-        const result = await model.generateContent(message.content);
-        const content = result.response.text();
-        const botMessage:Message = { sender: "bot", content: content };
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        // コンテンツ生成
+        // const result = await model.generateContent(message.content);
+        const chat = model.startChat({ history: history });
+        const result = await chat.sendMessage(message.content);
+
+        const botContent = result.response.text();
+        const botMessage: Message = { sender: "bot", content: botContent };
 
         return NextResponse.json(botMessage);
     } catch (error) {

@@ -60,9 +60,8 @@ export default function Home() {
                                 'text-left text-gray-600'}
                             `}
                     >
-                        <span>
-                            {message.sender}: {message.content}
-                        </span>
+                        <span>{message.sender}</span>
+                        <span>{message.content}</span>
                     </div>
                 ))}
             </div>
