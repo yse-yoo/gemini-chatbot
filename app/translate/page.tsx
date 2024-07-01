@@ -2,11 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-
-interface Message {
-    role: string;
-    content: string;
-}
+import { Message } from '../interfaces/Message';
 
 export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);

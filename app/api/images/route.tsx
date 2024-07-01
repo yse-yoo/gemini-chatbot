@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         const result = await model.generateContent(message.content);
 
         const botContent = result.response.text();
-        const botMessage: Message = { sender: "bot", content: botContent };
+        const botMessage: Message = { role: "bot", content: botContent };
 
         return NextResponse.json(botMessage);
     } catch (error) {

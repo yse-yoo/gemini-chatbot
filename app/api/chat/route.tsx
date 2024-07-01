@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const message = await req.json();
     if (!message) return;
 
-    // const botMessage:Message = { sender: "bot", content: "Hello" };
+    // const botMessage:Message = { role: "bot", content: "Hello" };
     // return NextResponse.json(botMessage);
 
     const API_KEY = process.env.GEMINI_API_KEY;
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         const result = await chat.sendMessage(message.content);
 
         const botContent = result.response.text();
-        const botMessage: Message = { sender: "bot", content: botContent };
+        const botMessage: Message = { role: "models", content: botContent };
 
         return NextResponse.json(botMessage);
     } catch (error) {
