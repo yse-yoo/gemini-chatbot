@@ -1,18 +1,22 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, ReactElement, ReactHTML } from 'react';
 import axios from 'axios';
 import { Message } from '../interfaces/Message';
+import { languages, getLanguageName } from '../components/lang';
 
 export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isListening, setIsListening] = useState<boolean>(false);
     const [recognition, setRecognition] = useState<any>(null);
+    const [fromLang, setFromLang] = useState<string>('ja-JP');
+    const [toLang, setToLang] = useState<string>('en-US');
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         translate();
-    }, []);
+    }, [fromLang, toLang]);
 
     useEffect(() => {
         scrollToBottom();
@@ -22,12 +26,22 @@ export default function Home() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const handleFromLang = (event: any) => {
+        console.log(event.target.value)
+        setFromLang(event.target.value);
+    };
+
+    const handleToLang = (event: any) => {
+        console.log(event.target.value)
+        setToLang(event.target.value);
+    };
+
     const translate = () => {
         if ('webkitSpeechRecognition' in window) {
             const speechRecognition = new (window as any).webkitSpeechRecognition();
             speechRecognition.continuous = false;
             speechRecognition.interimResults = false;
-            speechRecognition.lang = 'ja-JP';
+            speechRecognition.lang = fromLang;
 
             speechRecognition.onstart = () => {
                 setIsListening(true);
@@ -55,21 +69,48 @@ export default function Home() {
 
     const handleSubmit = async (userMessage: string) => {
         if (!userMessage) return;
-
         setMessages(prevMessages => [...prevMessages, { role: 'user', content: userMessage }]);
 
+        const requestData = {
+            userMessage: userMessage,
+            fromLangCode: fromLang,
+            toLangCode: toLang,
+        }
+
+        console.log(requestData)
+
         try {
-            const res = await axios.post('/api/translate', { userMessage });
-            setMessages(prevMessages => [...prevMessages, { role: 'bot', content: res.data.translate }]);
+            const res = await axios.post('/api/translate', requestData);
+            console.log("Response:", res)
+            setMessages(prevMessages => [...prevMessages, { role: 'models', content: res.data.translate }]);
         } catch (error) {
             console.error('Error fetching response:', error);
         }
     };
 
+
     return (
         <div className="p-4 mb-4 overflow-y-scroll">
-            <div className="fixed top-0 left-0 right-0 bg-white shadow-md p-4 z-10">
+            <div className="bg-white shadow-md p-4 z-10">
                 <h1>会話アプリ</h1>
+                <div>
+                    <select id="from-language" className="mx-3 p-3" value={fromLang} onChange={handleFromLang}>
+                        {languages.map((language) => (
+                            <option key={language.code} value={language.code}>
+                                {language.name}
+                            </option>
+                        ))}
+                    </select>
+                    →
+                    <select id="to-language" className="mx-3 p-3" value={toLang} onChange={handleToLang}>
+                        {languages.map((language) => (
+                            <option key={language.code} value={language.code}>
+                                {language.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
                 <button onClick={handleVoiceInput} className="p-2 bg-blue-500 text-white rounded mt-4">
                     {isListening ? 'Listening...' : '音声入力'}
                 </button>
