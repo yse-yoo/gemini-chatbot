@@ -11,6 +11,7 @@ export default function Home() {
     const [recognition, setRecognition] = useState<any>(null);
     const [fromLang, setFromLang] = useState<string>('ja-JP');
     const [toLang, setToLang] = useState<string>('en-US');
+    const [speechSupported, setSpeechSupported] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +35,15 @@ export default function Home() {
     const handleToLang = (event: any) => {
         console.log(event.target.value)
         setToLang(event.target.value);
+    };
+
+    const handleSpeak = (text:string) => {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert('Your browser does not support speech synthesis.');
+        }
     };
 
     const translate = () => {
@@ -80,9 +90,13 @@ export default function Home() {
         console.log(requestData)
 
         try {
-            const res = await axios.post('/api/translate', requestData);
-            console.log("Response:", res)
-            setMessages(prevMessages => [...prevMessages, { role: 'models', content: res.data.translate }]);
+            // const res = await axios.post('/api/translate', requestData);
+            // console.log("Response:", res)
+            // setMessages(prevMessages => [...prevMessages, { role: 'models', content: res.data.translate }]);
+
+            // Speach
+            console.log(userMessage)
+            handleSpeak(userMessage);
         } catch (error) {
             console.error('Error fetching response:', error);
         }
@@ -90,7 +104,7 @@ export default function Home() {
 
 
     return (
-        <div className="p-4 mb-4 overflow-y-scroll">
+        <div className="p-4 mb-4">
             <div className="bg-white shadow-md p-4 z-10">
                 <h1>会話アプリ</h1>
                 <div>
@@ -115,7 +129,9 @@ export default function Home() {
                     {isListening ? 'Listening...' : '音声入力'}
                 </button>
             </div>
+
             <div>
+                <div>Message</div>
                 {messages && messages.map((message, index) => (
                     <div
                         key={index}
