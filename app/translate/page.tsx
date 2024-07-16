@@ -37,7 +37,7 @@ export default function Home() {
         setToLang(event.target.value);
     };
 
-    const handleSpeak = (text:string) => {
+    const handleSpeak = (text: string) => {
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
             window.speechSynthesis.speak(utterance);
@@ -90,13 +90,14 @@ export default function Home() {
         console.log(requestData)
 
         try {
-            // const res = await axios.post('/api/translate', requestData);
-            // console.log("Response:", res)
-            // setMessages(prevMessages => [...prevMessages, { role: 'models', content: res.data.translate }]);
-
-            // Speach
-            console.log(userMessage)
-            handleSpeak(userMessage);
+            // Translate
+            const res = await axios.post('/api/translate', requestData);
+            if (res?.data.translate) {
+                setMessages(prevMessages => [...prevMessages, { role: 'models', content: res.data.translate }]);
+                // Speach
+                console.log(res.data.translate)
+                handleSpeak(res.data.translate);
+            }
         } catch (error) {
             console.error('Error fetching response:', error);
         }
@@ -107,6 +108,10 @@ export default function Home() {
         <div className="p-4 mb-4">
             <div className="bg-white shadow-md p-4 z-10">
                 <h1>会話アプリ</h1>
+                <input type="text" className="border p-3" />
+                <button className="p-2 bg-blue-500 text-white rounded mt-4">
+                    翻訳(Translate)
+                </button>
                 <div>
                     <select id="from-language" className="mx-3 p-3" value={fromLang} onChange={handleFromLang}>
                         {languages.map((language) => (
@@ -131,7 +136,6 @@ export default function Home() {
             </div>
 
             <div>
-                <div>Message</div>
                 {messages && messages.map((message, index) => (
                     <div
                         key={index}
